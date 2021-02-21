@@ -2,7 +2,7 @@
 # Maintainer: Danct12 <danct12@disroot.org>
 
 pkgname=anbox
-pkgver=0_git20201130
+pkgver=0_git20210106
 pkgrel=1
 arch=(x86_64 armv7h aarch64)
 url="http://anbox.io/"
