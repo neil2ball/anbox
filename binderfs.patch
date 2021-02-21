@@ -1,0 +1,58 @@
+diff -ruN a/scripts/mount-android.sh b/scripts/mount-android.sh
+--- a/scripts/mount-android.sh	2021-02-20 22:05:40.162065059 -0500
++++ b/scripts/mount-android.sh	2021-02-20 22:02:39.604053750 -0500
+@@ -34,4 +34,4 @@
+ done
+ 
+ $DIR/anbox-bridge.sh start
+-$DIR/load-kmods.sh
++#$DIR/load-kmods.sh
+diff -ruN a/src/anbox/cmds/session_manager.cpp b/src/anbox/cmds/session_manager.cpp
+--- a/src/anbox/cmds/session_manager.cpp	2021-02-20 22:05:40.166064996 -0500
++++ b/src/anbox/cmds/session_manager.cpp	2021-02-20 21:57:43.223902548 -0500
+@@ -142,7 +142,7 @@
+       return EXIT_FAILURE;
+     }
+ 
+-    if ((!fs::exists("/dev/binder") && !fs::exists(BINDERFS_PATH)) || !fs::exists("/dev/ashmem")) {
++    if ((!fs::exists("/dev/binderfs/binder") && !fs::exists(BINDERFS_PATH)) || !fs::exists("/dev/ashmem")) {
+       ERROR("Failed to start as either binder or ashmem kernel drivers are not loaded");
+       return EXIT_FAILURE;
+     }
+diff -ruN a/src/anbox/cmds/system_info.cpp b/src/anbox/cmds/system_info.cpp
+--- a/src/anbox/cmds/system_info.cpp	2021-02-20 22:05:40.166064996 -0500
++++ b/src/anbox/cmds/system_info.cpp	2021-02-20 21:56:38.420581099 -0500
+@@ -41,7 +41,7 @@
+ constexpr const char *os_release_path{"/etc/os-release"};
+ constexpr const char *host_os_release_path{"/var/lib/snapd/hostfs/etc/os-release"};
+ constexpr const char *proc_version_path{"/proc/version"};
+-constexpr const char *binder_path{"/dev/binder"};
++constexpr const char *binder_path{"/dev/binderfs/binder"};
+ constexpr const char *ashmem_path{"/dev/ashmem"};
+ constexpr const char *os_release_name{"NAME"};
+ constexpr const char *os_release_version{"VERSION"};
+diff -ruN a/src/anbox/container/lxc_container.cpp b/src/anbox/container/lxc_container.cpp
+--- a/src/anbox/container/lxc_container.cpp	2021-02-20 22:05:40.170064932 -0500
++++ b/src/anbox/container/lxc_container.cpp	2021-02-20 21:59:28.703015388 -0500
+@@ -409,11 +409,11 @@
+         binder_devices.size() != num_needed_binders)
+       throw std::runtime_error("Failed to allocate necessary binder devices");
+ 
+-    bind_mounts.insert({binder_devices[0]->path().string(), "/dev/binder"});
++    bind_mounts.insert({binder_devices[0]->path().string(), "/dev/binderfs/binder"});
+     binder_devices_ = std::move(binder_devices);
+   } else {
+-    DEBUG("Using static binder device /dev/binder");
+-    devices.insert({"/dev/binder", { 0666 }});
++    DEBUG("Using static binder device /dev/binderfs/binder");
++    devices.insert({"/dev/binderfs/binder", { 0666 }});
+   }
+ 
+   for (const auto &bind_mount : bind_mounts) {
+@@ -515,4 +515,4 @@
+ }
+ 
+ Container::State LxcContainer::state() { return state_; }
+-}
+\ No newline at end of file
++}
